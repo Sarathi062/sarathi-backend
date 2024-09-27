@@ -3,6 +3,9 @@ import mongoose from "mongoose";
 
 // console.log("Connecting to", config.MONGODB_URI);
 
+console.log("Connecting to", config.MONGODB_URI);
+
+
 const ConnectDB = async () => {
 	try {
 		await mongoose.connect(config.MONGODB_URI);
