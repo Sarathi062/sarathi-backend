@@ -1,9 +1,7 @@
 import config from "./utils/config.js";
 import mongoose from "mongoose";
 
-console.log("Connecting to", config.MONGODB_URI);
-// const uri =
-// 	"mongodb+srv://yashrajdhamale:JYCyk4W7a5JASivj@mentor.7x8l1.mongodb.net/Sarathi"; // Connection URL
+// console.log("Connecting to", config.MONGODB_URI);
 
 const ConnectDB = async () => {
 	try {
