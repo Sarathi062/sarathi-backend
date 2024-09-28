@@ -6,7 +6,7 @@ import {
 	registerMentee,
 	sendOTP,
 	verifyOTP,
-} from "./authController.js";
+} from "./controllers/authController.js";
 import {
 	authenticateToken,
 	getProfileMentee,
@@ -23,7 +23,7 @@ import {
 	callback,
 	addevent,
 	getUserCalendar,
-} from "./profileController.js";
+} from "./controllers/profileController.js";
 
 const router = express.Router();
 

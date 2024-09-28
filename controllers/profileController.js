@@ -1,8 +1,8 @@
 import jwt from "jsonwebtoken";
-import User from "./User-Model.js";
-import MenteeUser from "./Mentee-Model.js";
-import SessionRequest from "./SessionForm-Model.js";
-import CreatedSession from "./CreateSession-Model.js";
+import User from "../models/mentor.js";
+import MenteeUser from "../models/mentee.js";
+import SessionRequest from "../models/SessionForm-Model.js";
+import CreatedSession from "../models/CreateSession-Model.js";
 import { google } from "googleapis";
 import config from "../utils/config.js";
 
