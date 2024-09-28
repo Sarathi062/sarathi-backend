@@ -6,7 +6,7 @@ import {
 	registerMentee,
 	sendOTP,
 	verifyOTP,
-} from "./controllers/authController.js";
+} from "./authController.js";
 import {
 	authenticateToken,
 	getProfileMentee,
@@ -19,7 +19,11 @@ import {
 	getSession,
 	getMentors,
 	getSessiondetails,
-} from "./controllers/profileController.js";
+	auth,
+	callback,
+	addevent,
+	getUserCalendar,
+} from "./profileController.js";
 
 const router = express.Router();
 
@@ -45,8 +49,8 @@ router.route("/get-session").get(authenticateToken, getSession);
 router.route("/get-session-mentor").get(authenticateToken, getSessiondetails);
 router.route("/PostMenteeUsersession").post(registersession);
 
-router.route('/auth').get(auth);
-router.route('/auth/callback').get(callback);
+router.route("/auth").get(auth);
+router.route("/auth/callback").get(callback);
 router.route("/add-event").post(authenticateToken, addevent);
 
 router.route("/user/calendar").get(authenticateToken, getUserCalendar);
