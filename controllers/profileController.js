@@ -1,10 +1,14 @@
-import jwt from 'jsonwebtoken';
-import User from './User-Model.js';
-import MenteeUser from './Mentee-Model.js';
-import SessionRequest from './SessionForm-Model.js';
-import CreatedSession from './CreateSession-Model.js';
-import { google } from 'googleapis';
-const SECRET_KEY = process.env.SECRET_KEY; // Keep this key secure
+
+import jwt from "jsonwebtoken";
+import User from "./User-Model.js";
+import MenteeUser from "./Mentee-Model.js";
+import SessionRequest from "./SessionForm-Model.js";
+import CreatedSession from "./CreateSession-Model.js";
+import { google } from "googleapis";
+import config from "../utils/config.js";
+
+const SECRET_KEY = config.SECRET_KEY;
+
 
 // Middleware to authenticate token
 const authenticateToken = (req, res, next) => {
@@ -20,192 +24,207 @@ const authenticateToken = (req, res, next) => {
     });
 };
 const auth = async (req, res) => {
-    try {
-        const oauth2Client = new google.auth.OAuth2(
-            process.env.CLIENT_ID,
-            process.env.CLIENT_SECRET,
-            'http://localhost:3001/auth/callback',
+	try {
+		const oauth2Client = new google.auth.OAuth2(
+			config.CLIENT_ID,
+			config.CLIENT_SECRET,
+			"https://sarathi-backend-ten.vercel.app/auth/callback"
+		);
 
-        );
+		const scopes = [
+			"https://www.googleapis.com/auth/calendar",
+			"https://www.googleapis.com/auth/calendar.events",
+			"https://www.googleapis.com/auth/userinfo.email",
+			"https://www.googleapis.com/auth/userinfo.profile",
+			"https://www.googleapis.com/auth/calendar.readonly",
+			"https://www.googleapis.com/auth/calendar.events.readonly",
+		];
+		const url = oauth2Client.generateAuthUrl({
+			access_type: "offline",
+			scope: scopes,
+		});
 
-        const scopes = ['https://www.googleapis.com/auth/calendar', 'https://www.googleapis.com/auth/calendar.events', 'https://www.googleapis.com/auth/userinfo.email', 'https://www.googleapis.com/auth/userinfo.profile', 'https://www.googleapis.com/auth/calendar.readonly',
-            'https://www.googleapis.com/auth/calendar.events.readonly',];
-        const url = oauth2Client.generateAuthUrl({
-            access_type: 'offline',
-            scope: scopes,
-        });
-
-        res.json({ url });
-    } catch (error) {
-        console.error('Error authenticating with Google:', error);
-        res.status(500).json({ error: 'Failed to authenticate with Google' });
-    }
+		res.json({ url });
+	} catch (error) {
+		console.error("Error authenticating with Google:", error);
+		res.status(500).json({ error: "Failed to authenticate with Google" });
+	}
 
 };
 
 // Callback route (after OAuth authorization)
 const callback = async (req, res) => {
-    try {
-        const oauth2Client = new google.auth.OAuth2(
-            process.env.CLIENT_ID,
-            process.env.CLIENT_SECRET,
-            'http://localhost:3001/auth/callback'  // Update to your redirect URI
-        );
 
-        // Exchange the authorization code for access tokens
-        const { tokens } = await oauth2Client.getToken(req.query.code);
-        oauth2Client.setCredentials(tokens);
+	try {
+		const oauth2Client = new google.auth.OAuth2(
+			config.CLIENT_ID,
+			config.CLIENT_SECRET,
+			"https://sarathi-backend-ten.vercel.app/auth/callback" // Update to your redirect URI
+		);
 
-        // Get the user's profile information
-        const oauth2 = google.oauth2({ version: 'v2', auth: oauth2Client });
-        const userInfo = await oauth2.userinfo.get();
-        const user = await User.findOne({ email: userInfo.data.email });
-        if (!user) {
-            return res.status(404).json({ error: 'User not found authenticate using the registered account' });
-        }
+		// Exchange the authorization code for access tokens
+		const { tokens } = await oauth2Client.getToken(req.query.code);
+		oauth2Client.setCredentials(tokens);
 
-        //save the access token and refresh token to the database
-        user.access_token = tokens.access_token;
-        user.refresh_token = tokens.refresh_token;
-        await user.save();
+		// Get the user's profile information
+		const oauth2 = google.oauth2({ version: "v2", auth: oauth2Client });
+		const userInfo = await oauth2.userinfo.get();
+		const user = await User.findOne({ email: userInfo.data.email });
+		if (!user) {
+			return res.status(404).json({
+				error: "User not found authenticate using the registered account",
+			});
+		}
 
-        res.send(`
+		//save the access token and refresh token to the database
+		user.access_token = tokens.access_token;
+		user.refresh_token = tokens.refresh_token;
+		await user.save();
+
+		res.send(`
             <script>
                 window.opener.postMessage({ success: true }, '*');
                 window.close();
             </script>
         `);
-    } catch (error) {
-        console.error('Error creating event:', error);
-        res.status(500).json({ message: 'Failed to create event', error });
-    }
+	} catch (error) {
+		console.error("Error creating event:", error);
+		res.status(500).json({ message: "Failed to create event", error });
+	}
 };
 
-
-
 const addevent = async (req, res) => {
-    try {
-        const oauth2Client = new google.auth.OAuth2(
-            process.env.CLIENT_ID,
-            process.env.CLIENT_SECRET,
-            'http://localhost:3001/auth/callback'  // Update to your redirect URI
-        );
+	try {
+		const oauth2Client = new google.auth.OAuth2(
+			config.CLIENT_ID,
+			config.CLIENT_SECRET,
+			"https://sarathi-backend-ten.vercel.app/auth/callback" // Update to your redirect URI
+		);
 
-        const user = await User.findById(req.user.id);
-        if (!user) {
-            return res.status(404).json({ message: 'User not found' });
-        }
+		const user = await User.findById(req.user.id);
+		if (!user) {
+			return res.status(404).json({ message: "User not found" });
+		}
 
-        // Set the credentials (access and refresh tokens)
-        oauth2Client.setCredentials({
-            access_token: user.access_token,
-            refresh_token: user.refresh_token,
-        });
+		// Set the credentials (access and refresh tokens)
+		oauth2Client.setCredentials({
+			access_token: user.access_token,
+			refresh_token: user.refresh_token,
+		});
 
-        // Refresh the token if the access token has expired
-        oauth2Client.on('tokens', async (tokens) => {
-            if (tokens.refresh_token) {
-                user.refresh_token = tokens.refresh_token; // Save new refresh token if available
-            }
-            user.access_token = tokens.access_token; // Update access token
-            await user.save();
-        });
+		// Refresh the token if the access token has expired
+		oauth2Client.on("tokens", async (tokens) => {
+			if (tokens.refresh_token) {
+				user.refresh_token = tokens.refresh_token; // Save new refresh token if available
+			}
+			user.access_token = tokens.access_token; // Update access token
+			await user.save();
+		});
 
-        // Check if the access token has expired and refresh if necessary
-        if (!oauth2Client.credentials || !oauth2Client.credentials.access_token || oauth2Client.credentials.expiry_date < Date.now()) {
-            const { tokens } = await oauth2Client.refreshAccessToken();
-            oauth2Client.setCredentials(tokens);
-            user.access_token = tokens.access_token;
-            await user.save();
-        }
+		// Check if the access token has expired and refresh if necessary
+		if (
+			!oauth2Client.credentials ||
+			!oauth2Client.credentials.access_token ||
+			oauth2Client.credentials.expiry_date < Date.now()
+		) {
+			const { tokens } = await oauth2Client.refreshAccessToken();
+			oauth2Client.setCredentials(tokens);
+			user.access_token = tokens.access_token;
+			await user.save();
+		}
 
-        const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
-        const event = {
-            summary: 'Project Discussion with Mentor',
-            description: 'Discuss the project progress and next steps with the mentor.',
-            location: 'Google Meet',  // You can add a physical location if necessary
-            start: {
-                dateTime: '2024-09-01T10:00:00',  // ISO format
-                timeZone: 'America/Los_Angeles',
-            },
-            end: {
-                dateTime: '2024-09-01T11:00:00',  // End time should be after the start time
-                timeZone: 'America/Los_Angeles',
-            },
-            conferenceData: {
-                createRequest: {
-                    requestId: 'random-string-id',
-                    conferenceSolutionKey: {
-                        type: 'hangoutsMeet',  // Adds Google Meet link automatically
-                    },
-                },
-            },
-            attendees: [
-                { email: 'yashrajdhamale8@gmail.com', responseStatus: 'accepted' },  // Primary attendee
-                { email: 'example.mentee@gmail.com', responseStatus: 'needsAction' },  // Optional attendee
-                { email: 'mentor@example.com', responseStatus: 'accepted', organizer: true },  // Organizer
-            ],
-            reminders: {
-                useDefault: false,  // Use custom reminders
-                overrides: [
-                    { method: 'email', minutes: 24 * 60 },  // 24 hours before
-                    { method: 'popup', minutes: 10 },  // 10 minutes before
-                ],
-            },
-            colorId: '5',  // Choose colorId from Google Calendar's color options
-            transparency: 'opaque',  // Can be 'transparent' (free) or 'opaque' (busy)
-            visibility: 'private',  // Can be 'private' or 'public'
-        };
-        
+		const calendar = google.calendar({ version: "v3", auth: oauth2Client });
+		const event = {
+			summary: "Project Discussion with Mentor",
+			description:
+				"Discuss the project progress and next steps with the mentor.",
+			location: "Google Meet", // You can add a physical location if necessary
+			start: {
+				dateTime: "2024-09-01T10:00:00", // ISO format
+				timeZone: "America/Los_Angeles",
+			},
+			end: {
+				dateTime: "2024-09-01T11:00:00", // End time should be after the start time
+				timeZone: "America/Los_Angeles",
+			},
+			conferenceData: {
+				createRequest: {
+					requestId: "random-string-id",
+					conferenceSolutionKey: {
+						type: "hangoutsMeet", // Adds Google Meet link automatically
+					},
+				},
+			},
+			attendees: [
+				{ email: "yashrajdhamale8@gmail.com", responseStatus: "accepted" }, // Primary attendee
+				{ email: "example.mentee@gmail.com", responseStatus: "needsAction" }, // Optional attendee
+				{
+					email: "mentor@example.com",
+					responseStatus: "accepted",
+					organizer: true,
+				}, // Organizer
+			],
+			reminders: {
+				useDefault: false, // Use custom reminders
+				overrides: [
+					{ method: "email", minutes: 24 * 60 }, // 24 hours before
+					{ method: "popup", minutes: 10 }, // 10 minutes before
+				],
+			},
+			colorId: "5", // Choose colorId from Google Calendar's color options
+			transparency: "opaque", // Can be 'transparent' (free) or 'opaque' (busy)
+			visibility: "private", // Can be 'private' or 'public'
+		};
 
-        const response = await calendar.events.insert({
-            calendarId: 'primary',
-            resource: event,
-            conferenceDataVersion: 1,
-            sendUpdates: 'all',
-        });
+		const response = await calendar.events.insert({
+			calendarId: "primary",
+			resource: event,
+			conferenceDataVersion: 1,
+			sendUpdates: "all",
+		});
 
-        res.status(200).json({ message: 'Event added successfully', data: response.data });
-    } catch (error) {
-        console.error('Error creating event:', error);
-        res.status(500).json({ message: 'Failed to create event', error });
-    }
+		res
+			.status(200)
+			.json({ message: "Event added successfully", data: response.data });
+	} catch (error) {
+		console.error("Error creating event:", error);
+		res.status(500).json({ message: "Failed to create event", error });
+	}
 };
 
 const getUserCalendar = async (req, res) => {
-    try {
-        const oauth2Client = new google.auth.OAuth2(
-            process.env.CLIENT_ID,
-            process.env.CLIENT_SECRET,
-            'http://localhost:3001/auth/callback'  // Replace with actual redirect URI
-        );
-        const user = await User.findById(req.user.id);
-       
-        oauth2Client.setCredentials({
-            access_token: user.access_token,
-            refresh_token: user.refresh_token,
-        });
+	try {
+		const oauth2Client = new google.auth.OAuth2(
+			config.CLIENT_ID,
+			config.CLIENT_SECRET,
+			"https://sarathi-backend-ten.vercel.app/auth/callback" // Replace with actual redirect URI
+		);
+		const user = await User.findById(req.user.id);
 
-        const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
+		oauth2Client.setCredentials({
+			access_token: user.access_token,
+			refresh_token: user.refresh_token,
+		});
 
-        // Fetch the user's calendar list
-        const { data } = await calendar.calendarList.list();
+		const calendar = google.calendar({ version: "v3", auth: oauth2Client });
 
-        // Get the primary calendar ID
-        const primaryCalendar = data.items.find(cal => cal.primary);
+		// Fetch the user's calendar list
+		const { data } = await calendar.calendarList.list();
 
-        if (!primaryCalendar) {
-            return res.status(404).json({ message: 'Primary calendar not found' });
-        }
+		// Get the primary calendar ID
+		const primaryCalendar = data.items.find((cal) => cal.primary);
 
-        // Send the calendar ID back to the client
-        res.status(200).json({ calendarId: primaryCalendar.id });
-    } catch (error) {
-        console.error('Error fetching user calendar:', error);
-        res.status(500).json({ message: 'Failed to fetch user calendar', error });
-    }
+		if (!primaryCalendar) {
+			return res.status(404).json({ message: "Primary calendar not found" });
+		}
+
+		// Send the calendar ID back to the client
+		res.status(200).json({ calendarId: primaryCalendar.id });
+	} catch (error) {
+		console.error("Error fetching user calendar:", error);
+		res.status(500).json({ message: "Failed to fetch user calendar", error });
+	}
 };
-
 
 // Fetch profile controller
 const getProfileMentee = async (req, res) => {
@@ -354,4 +373,20 @@ const registersession = async (req, res) => {
     }
 }
 // Export functions using ES module syntax
-export { authenticateToken, getProfileMentee, getProfileMentor, getDashboardMentee, getEditMentor, getDashboardMentor, registersession, createSession, getSession, getMentors, getSessiondetails, auth, callback, addevent,getUserCalendar };
+export {
+	authenticateToken,
+	getProfileMentee,
+	getProfileMentor,
+	getDashboardMentee,
+	getEditMentor,
+	getDashboardMentor,
+	registersession,
+	createSession,
+	getSession,
+	getMentors,
+	getSessiondetails,
+	auth,
+	callback,
+	addevent,
+	getUserCalendar,
+};

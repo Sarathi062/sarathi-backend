@@ -28,7 +28,9 @@ router.route('/PostMenteeUsersession').post(registersession);
 
 router.route('/auth').get(auth);
 router.route('/auth/callback').get(callback);
-router.route('/add-event').post(authenticateToken,addevent);
 
-router.route('/user/calendar').get(authenticateToken,getUserCalendar);
+router.route("/add-event").post(authenticateToken, addevent);
+
+router.route("/user/calendar").get(authenticateToken, getUserCalendar);
+
 export default router;

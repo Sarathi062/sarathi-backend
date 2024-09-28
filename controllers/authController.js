@@ -65,11 +65,12 @@ function generateOTP() {
 
 // Email transporter
 const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-        user: 'sarathi062023@gmail.com',
-        pass: process.env.pass,
-    },
+	service: "gmail",
+	auth: {
+		user: "sarathi062023@gmail.com",
+		pass: config.pass,
+	},
+
 });
 
 // Function to send OTP email
