@@ -28,11 +28,13 @@ export const login = async (req, res) => {
 
 		// Create a token
 		const token = jwt.sign({ id: user._id, email: user.email }, SECRET_KEY, {
-			expiresIn: "1hr",
+			expiresIn: 60 * 60,
 		});
 		res.status(200).json({ message: "Login successful", token, user });
 	} catch (error) {
-		res.status(500).json({ error: "Error occurred" });
+		return response.status(401).json({
+			error: "token expired",
+		});
 	}
 };
 export const loginMentee = async (req, res) => {
