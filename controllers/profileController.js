@@ -27,7 +27,7 @@ const auth = async (req, res) => {
 		const oauth2Client = new google.auth.OAuth2(
 			config.CLIENT_ID,
 			config.CLIENT_SECRET,
-			"https://sarathi-backend-ten.vercel.app/auth/callback"
+			"https://sarathi-backend-cgm8.onrender.com/auth/callback"
 		);
 
 		const scopes = [
@@ -56,7 +56,7 @@ const callback = async (req, res) => {
 		const oauth2Client = new google.auth.OAuth2(
 			config.CLIENT_ID,
 			config.CLIENT_SECRET,
-			"https://sarathi-backend-ten.vercel.app/auth/callback" // Update to your redirect URI
+			"https://sarathi-backend-cgm8.onrender.com/auth/callback" // Update to your redirect URI
 		);
 
 		// Exchange the authorization code for access tokens
@@ -95,7 +95,7 @@ const addevent = async (req, res) => {
 		const oauth2Client = new google.auth.OAuth2(
 			config.CLIENT_ID,
 			config.CLIENT_SECRET,
-			"https://sarathi-backend-ten.vercel.app/auth/callback" // Update to your redirect URI
+			"https://sarathi-backend-cgm8.onrender.com/auth/callback" // Update to your redirect URI
 		);
 
 		const user = await User.findById(req.user.id);
@@ -194,7 +194,7 @@ const getUserCalendar = async (req, res) => {
 		const oauth2Client = new google.auth.OAuth2(
 			config.CLIENT_ID,
 			config.CLIENT_SECRET,
-			"https://sarathi-backend-ten.vercel.app/auth/callback" // Replace with actual redirect URI
+			"https://sarathi-backend-cgm8.onrender.com/auth/callback" // Replace with actual redirect URI
 		);
 		const user = await User.findById(req.user.id);
 
