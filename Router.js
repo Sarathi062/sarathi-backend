@@ -27,7 +27,7 @@ import {
 
 const router = express.Router();
 
-router.route("/login-Mentor").post(loginMentor);
+router.route("/login-Mentor").post(login);
 router.route("/login-Mentee").post(loginMentee);
 router.route("/register-mentor").post(registerMentor);
 router.route("/register-mentee").post(registerMentee);
