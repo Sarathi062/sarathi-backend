@@ -6,7 +6,7 @@ dotenv.config();
 
 const config = {
 	PORT: process.env.PORT || 3001,
-	MONGODB_URI: process.env.MONGODB_URI,
+	MONGODB_URI: process.env.DBURI,
 	SECRET_KEY: process.env.SECRET_KEY,
 	pass: process.env.pass,
 	CLIENT_ID: process.env.CLIENT_ID,
