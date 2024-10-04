@@ -301,19 +301,10 @@ const getEditMentor = async (req, res) => {
 };
 const createSession = async (req, res) => {
 	try {
-		const { title, description, date, timeFrom, timeTo, price, type } =
-			req.body;
+		const { title, description, start, end, price, type } = req.body;
 
 		// Validate required fields
-		if (
-			!title ||
-			!description ||
-			!date ||
-			!timeFrom ||
-			!timeTo ||
-			!price ||
-			!type
-		) {
+		if (!title || !description || !start || !end || !price || !type) {
 			return res.status(400).json({ error: "All fields are required" });
 		}
 
@@ -321,9 +312,8 @@ const createSession = async (req, res) => {
 		const newSession = new CreatedSession({
 			title,
 			description,
-			date,
-			timeFrom,
-			timeTo,
+			start, // Use the ISO date directly
+			end, // Use the ISO date directly
 			price,
 			type,
 			mentorID: req.user.id, // Ensure req.user.id is set properly
@@ -342,6 +332,7 @@ const createSession = async (req, res) => {
 			.json({ error: "Error occurred while creating the session" });
 	}
 };
+
 const getSession = async (req, res) => {
 	try {
 		const mentorID = req.headers.mentorid; // Extract mentorID from headers

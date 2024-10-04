@@ -33,13 +33,13 @@ const menteeSchema = new mongoose.Schema({
 });
 
 // add this method to schema to remove _id, __v, and password when returning user
-menteeSchema.set("toJSON", {
-	transform: (document, returnedObject) => {
-		returnedObject.id = returnedObject._id.toString();
-		delete returnedObject._id;
-		delete returnedObject.__v;
-	},
-});
+// menteeSchema.set("toJSON", {
+// 	transform: (document, returnedObject) => {
+// 		returnedObject.id = returnedObject._id.toString();
+// 		delete returnedObject._id;
+// 		delete returnedObject.__v;
+// 	},
+// });
 
 const MenteeUser = mongoose.model("MenteeUser", menteeSchema);
 
