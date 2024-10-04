@@ -1,12 +1,12 @@
 import express from "express";
 import {
-	loginMentor,
+	login,
 	loginMentee,
 	registerMentor,
 	registerMentee,
 	sendOTP,
 	verifyOTP,
-} from "./authController.js";
+} from "./controllers/authController.js";
 import {
 	authenticateToken,
 	getProfileMentee,
@@ -23,7 +23,7 @@ import {
 	callback,
 	addevent,
 	getUserCalendar,
-} from "./profileController.js";
+} from "./controllers/profileController.js";
 
 const router = express.Router();
 
@@ -54,4 +54,5 @@ router.route("/auth/callback").get(callback);
 router.route("/add-event").post(authenticateToken, addevent);
 
 router.route("/user/calendar").get(authenticateToken, getUserCalendar);
+
 export default router;
