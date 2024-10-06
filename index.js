@@ -18,7 +18,7 @@ app.use('/', router);
 // Connect to the database and start the server
 ConnectDB().then(() => {
     app.listen(PORT, () => {
-        console.log(`Connected to the port http://localhost:${PORT}/`);
+        console.log(`Connected to the port https://sarathi-backend-cgm8.onrender.com:${PORT}/`);
     });
 }).catch((err) => {
     console.error('Failed to connect to the database', err);
