@@ -24,7 +24,7 @@ const auth = async (req, res) => {
         const oauth2Client = new google.auth.OAuth2(
             process.env.CLIENT_ID,
             process.env.CLIENT_SECRET,
-            'http://localhost:3001/auth/callback',
+            'https://sarathi-backend-cgm8.onrender.com/auth/callback',
 
         );
 
@@ -49,7 +49,7 @@ const callback = async (req, res) => {
         const oauth2Client = new google.auth.OAuth2(
             process.env.CLIENT_ID,
             process.env.CLIENT_SECRET,
-            'http://localhost:3001/auth/callback'  // Update to your redirect URI
+            'https://sarathi-backend-cgm8.onrender.com/auth/callback'  // Update to your redirect URI
         );
 
         // Exchange the authorization code for access tokens
@@ -101,7 +101,7 @@ const addevent = async (req, res) => {
         const oauth2Client = new google.auth.OAuth2(
             process.env.CLIENT_ID,
             process.env.CLIENT_SECRET,
-            'http://localhost:3001/auth/callback'  // Update to your redirect URI
+            'https://sarathi-backend-cgm8.onrender.com/auth/callback'  // Update to your redirect URI
         );
 
         const user = await User.findById(req.user.id);
@@ -188,7 +188,7 @@ const getUserCalendar = async (req, res) => {
         const oauth2Client = new google.auth.OAuth2(
             process.env.CLIENT_ID,
             process.env.CLIENT_SECRET,
-            'http://localhost:3001/auth/callback'  // Replace with actual redirect URI
+            'https://sarathi-backend-cgm8.onrender.com/auth/callback'  // Replace with actual redirect URI
         );
         const user = await User.findById(req.user.id);
        
